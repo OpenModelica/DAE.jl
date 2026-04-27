@@ -7,27 +7,31 @@
 *
 * All rights reserved.
 *
-* THIS PROGRAM IS PROVIDED UNDER THE TERMS OF GPL VERSION 3 LICENSE OR
-* THIS OSMC PUBLIC LICENSE (OSMC-PL) VERSION 1.2.
+* THIS PROGRAM IS PROVIDED UNDER THE TERMS OF AGPL VERSION 3 LICENSE OR
+* THIS OSMC PUBLIC LICENSE (OSMC-PL) VERSION 1.8.
 * ANY USE, REPRODUCTION OR DISTRIBUTION OF THIS PROGRAM CONSTITUTES
-* RECIPIENT'S ACCEPTANCE OF THE OSMC PUBLIC LICENSE OR THE GPL VERSION 3,
+* RECIPIENT'S ACCEPTANCE OF THE OSMC PUBLIC LICENSE OR THE GNU AGPL VERSION 3,
 * ACCORDING TO RECIPIENTS CHOICE.
 *
-* The OpenModelica software and the Open Source Modelica
-* Consortium (OSMC) Public License (OSMC-PL) are obtained
-* from OSMC, either from the above address,
-* from the URLs: http:www.ida.liu.se/projects/OpenModelica or
-* http:www.openmodelica.org, and in the OpenModelica distribution.
-* GNU version 3 is obtained from: http:www.gnu.org/copyleft/gpl.html.
+* The OpenModelica software and the OSMC (Open Source Modelica Consortium)
+* Public License (OSMC-PL) are obtained from OSMC, either from the above
+* address, from the URLs:
+* http://www.openmodelica.org or
+* https://github.com/OpenModelica/ or
+* http://www.ida.liu.se/projects/OpenModelica,
+* and in the OpenModelica distribution.
+*
+* GNU AGPL version 3 is obtained from:
+* https://www.gnu.org/licenses/licenses.html#GPL
 *
 * This program is distributed WITHOUT ANY WARRANTY; without
-* even the implied warranty of  MERCHANTABILITY or FITNESS
+* even the implied warranty of MERCHANTABILITY or FITNESS
 * FOR A PARTICULAR PURPOSE, EXCEPT AS EXPRESSLY SET FORTH
 * IN THE BY RECIPIENT SELECTED SUBSIDIARY LICENSE CONDITIONS OF OSMC-PL.
 *
 * See the full OSMC Public License conditions for more details.
 *
-=#
+*/ =#
 
 module DAE
 
@@ -35,8 +39,8 @@ using MetaModelica
 using ExportAll
 
 include("DAE_Interface.jl")
-include("./Values.jl")
-include("./ClassInf.jl")
+include("Values.jl")
+include("ClassInf.jl")
 
 import ..ClassInf
 import ..Values
@@ -59,77 +63,61 @@ const auxNamePrefix = "AUX"::String
 
 @Uniontype VarKind begin
   @Record VARIABLE begin
-
   end
 
   @Record DISCRETE begin
-
   end
 
   @Record PARAM begin
-
   end
 
   @Record CONST begin
-
   end
 end
 
 #= The type of a connector element. =#
 @Uniontype ConnectorType begin
   @Record POTENTIAL begin
-
   end
 
   @Record FLOW begin
-
   end
 
   @Record STREAM begin
-
     associatedFlow::Option{ComponentRef}
   end
 
   @Record NON_CONNECTOR begin
-
   end
 end
 
 @Uniontype VarDirection begin
   @Record INPUT begin
-
   end
 
   @Record OUTPUT begin
-
   end
 
   @Record BIDIR begin
-
   end
 end
 
 @Uniontype VarParallelism begin
   @Record PARGLOBAL begin
-
   end
 
   @Record PARLOCAL begin
-
   end
 
   @Record NON_PARALLEL begin
-
   end
 end
 
 @Uniontype VarVisibility begin
   @Record PUBLIC begin
-
   end
 
   @Record PROTECTED begin
-
   end
 end
 
@@ -163,47 +151,45 @@ end
 const dummyInfo = Absyn.SOURCEINFO("", false, 0, 0, 0, 0, 0.0)::Absyn.Info
 const emptyElementSource = SOURCE(dummyInfo, nil, nothing #= Prefix.NOCOMPPRE() =#, nil, nil, nil, nil)::ElementSource
 
+function ElementSource_getInfo(source::ElementSource)::SourceInfo
+  @match SOURCE(info = info) = source
+  return info
+end
+
 @Uniontype SymbolicOperation begin
   @Record FLATTEN begin
-
     scode::SCode.EEquation
     dae::Option{Element}
   end
 
   @Record SIMPLIFY begin
-
     before::EquationExp
     after::EquationExp
   end
 
   @Record SUBSTITUTION begin
-
     substitutions::List{Exp}
     source::Exp
   end
 
   @Record OP_INLINE begin
-
     before::EquationExp
     after::EquationExp
   end
 
   @Record OP_SCALARIZE begin
-
     before::EquationExp
     index::ModelicaInteger
     after::EquationExp
   end
 
   @Record OP_DIFFERENTIATE begin
-
     cr::ComponentRef
     before::Exp
     after::Exp
   end
 
   @Record SOLVE begin
-
     cr::ComponentRef
     exp1::Exp
     exp2::Exp
@@ -212,13 +198,11 @@ const emptyElementSource = SOURCE(dummyInfo, nil, nothing #= Prefix.NOCOMPPRE() 
   end
 
   @Record SOLVED begin
-
     cr::ComponentRef
     exp::Exp
   end
 
   @Record LINEAR_SOLVED begin
-
     vars::List{ComponentRef}
     jac::List{List{ModelicaReal}}
     rhs::List{ModelicaReal}
@@ -226,13 +210,11 @@ const emptyElementSource = SOURCE(dummyInfo, nil, nothing #= Prefix.NOCOMPPRE() 
   end
 
   @Record NEW_DUMMY_DER begin
-
     chosen::ComponentRef
     candidates::List{ComponentRef}
   end
 
   @Record OP_RESIDUAL begin
-
     e1::Exp
     e2::Exp
     e::Exp
@@ -242,17 +224,14 @@ end
 #= An equation on residual or equality form has 1 or 2 expressions. For use with symbolic operation tracing. =#
 @Uniontype EquationExp begin
   @Record PARTIAL_EQUATION begin
-
     exp::Exp
   end
 
   @Record RESIDUAL_EXP begin
-
     exp::Exp
   end
 
   @Record EQUALITY_EXPS begin
-
     lhs::Exp
     rhs::Exp
   end
@@ -260,7 +239,6 @@ end
 
 @Uniontype Function begin
   @Record FUNCTION begin
-
     path::Absyn.Path
     functions #= contains the body and an optional function derivative mapping =#::List{FunctionDefinition}
     type_::Type
@@ -273,7 +251,6 @@ end
   end
 
   @Record RECORD_CONSTRUCTOR begin
-
     path::Absyn.Path
     type_::Type
     source #= the origin of the component/equation/algorithm =#::ElementSource
@@ -282,44 +259,35 @@ end
 
 @Uniontype InlineType begin
   @Record NORM_INLINE begin
-
   end
 
   @Record BUILTIN_EARLY_INLINE begin
-
   end
 
   @Record EARLY_INLINE begin
-
   end
 
   @Record DEFAULT_INLINE begin
-
   end
 
   @Record NO_INLINE begin
-
   end
 
   @Record AFTER_INDEX_RED_INLINE begin
-
   end
 end
 
 @Uniontype FunctionDefinition begin
   @Record FUNCTION_DEF begin
-
     body::List{Element}
   end
 
   @Record FUNCTION_EXT begin
-
     body::List{Element}
     externalDecl::ExternalDecl
   end
 
   @Record FUNCTION_DER_MAPPER begin
-
     derivedFunction #= Function that is derived =#::Absyn.Path
     derivativeFunction #= Path to derivative function =#::Absyn.Path
     derivativeOrder #= in case a function have multiple derivatives, include all =#::ModelicaInteger
@@ -332,18 +300,15 @@ end
 #= Different conditions on derivatives =#
 @Uniontype derivativeCond begin
   @Record ZERO_DERIVATIVE begin
-
   end
 
   @Record NO_DERIVATIVE begin
-
     binding::Exp
   end
 end
 
 @Uniontype VariableAttributes begin
   @Record VAR_ATTR_REAL begin
-
     quantity #= quantity =#::Option{Exp}
     unit #= unit =#::Option{Exp}
     displayUnit #= displayUnit =#::Option{Exp}
@@ -362,7 +327,6 @@ end
   end
 
   @Record VAR_ATTR_INT begin
-
     quantity #= quantity =#::Option{Exp}
     min::Option{Exp}
     max::Option{Exp}
@@ -379,7 +343,6 @@ end
   end
 
   @Record VAR_ATTR_BOOL begin
-
     quantity #= quantity =#::Option{Exp}
     start #= start value =#::Option{Exp}
     fixed #= fixed - true: default for parameter/constant, false - default for other variables =#::Option{Exp}
@@ -390,13 +353,11 @@ end
   end
 
   @Record VAR_ATTR_CLOCK begin
-
     isProtected::Option{Bool}
     finalPrefix::Option{Bool}
   end
 
   @Record VAR_ATTR_STRING begin
-
     quantity #= quantity =#::Option{Exp}
     start #= start value =#::Option{Exp}
     fixed #= new in Modelica 3.4; fixed - true: default for parameter/constant, false - default for other variables =#::Option{Exp}
@@ -407,7 +368,6 @@ end
   end
 
   @Record VAR_ATTR_ENUMERATION begin
-
     quantity #= quantity =#::Option{Exp}
     min::Option{Exp}
     max::Option{Exp}
@@ -426,43 +386,34 @@ const emptyVarAttrBool = VAR_ATTR_BOOL(NONE(), NONE(), NONE(), NONE(), NONE(), N
 
 @Uniontype StateSelect begin
   @Record NEVER begin
-
   end
 
   @Record AVOID begin
-
   end
 
   @Record DEFAULT begin
-
   end
 
   @Record PREFER begin
-
   end
 
   @Record ALWAYS begin
-
   end
 end
 
 @Uniontype Uncertainty begin
   @Record GIVEN begin
-
   end
 
   @Record SOUGHT begin
-
   end
 
   @Record REFINE begin
-
   end
 end
 
 @Uniontype Distribution begin
   @Record DISTRIBUTION begin
-
     name::Exp
     params::Exp
     paramNames::Exp
@@ -471,33 +422,28 @@ end
 
 @Uniontype ExtArg begin
   @Record EXTARG begin
-
     componentRef::ComponentRef
     direction::Absyn.Direction
     type_::Type
   end
 
   @Record EXTARGEXP begin
-
     exp::Exp
     type_::Type
   end
 
   @Record EXTARGSIZE begin
-
     componentRef::ComponentRef
     type_::Type
     exp::Exp
   end
 
   @Record NOEXTARG begin
-
   end
 end
 
 @Uniontype ExternalDecl begin
   @Record EXTERNALDECL begin
-
     name::String
     args::List{ExtArg}
     returnArg::ExtArg
@@ -519,7 +465,6 @@ end
 It is simple a list of algorithm statements. =#
 @Uniontype Algorithm begin
   @Record ALGORITHM_STMTS begin
-
     statementLst::List{Statement}
   end
 end
@@ -528,12 +473,10 @@ end
 It is simple a list of expressions. =#
 @Uniontype Constraint begin
   @Record CONSTRAINT_EXPS begin
-
     constraintLst::List{Exp}
   end
 
   @Record CONSTRAINT_DT begin
-
     constraint::Exp
     localCon #= local or global constraint; local constraints depend on variables that are computed within the algebraic loop itself =#::Bool
   end
@@ -542,7 +485,6 @@ end
 #= currently for Optimica extension: these are the objectives of optimization class =#
 @Uniontype ClassAttributes begin
   @Record OPTIMIZATION_ATTRS begin
-
     objetiveE::Option{Exp}
     objectiveIntegrandE::Option{Exp}
     startTimeE::Option{Exp}
@@ -566,7 +508,6 @@ end
   end
 
   @Record STMT_TUPLE_ASSIGN begin
-
     type_::Type
     expExpLst::List{Exp}
     exp::Exp
@@ -574,7 +515,6 @@ end
   end
 
   @Record STMT_ASSIGN_ARR begin
-
     type_::Type
     lhs::Exp
     exp::Exp
@@ -582,7 +522,6 @@ end
   end
 
   @Record STMT_IF begin
-
     exp::Exp
     statementLst::List{Statement}
     else_::Else
@@ -590,7 +529,6 @@ end
   end
 
   @Record STMT_FOR begin
-
     type_ #= this is the type of the iterator =#::Type
     iterIsArray #= True if the iterator has an array type, otherwise false. =#::Bool
     iter #= the iterator variable =#::String
@@ -601,7 +539,6 @@ end
   end
 
   @Record STMT_PARFOR begin
-
     type_ #= this is the type of the iterator =#::Type
     iterIsArray #= True if the iterator has an array type, otherwise false. =#::Bool
     iter #= the iterator variable =#::String
@@ -613,14 +550,12 @@ end
   end
 
   @Record STMT_WHILE begin
-
     exp::Exp
     statementLst::List{Statement}
     source #= the origin of the component/equation/algorithm =#::ElementSource
   end
 
   @Record STMT_WHEN begin
-
     exp::Exp
     conditions::List{ComponentRef}
     #=  list of boolean variables as conditions  (this is simcode stuff)
@@ -634,7 +569,6 @@ end
   end
 
   @Record STMT_ASSERT begin
-
     cond::Exp
     msg::Exp
     level::Exp
@@ -642,41 +576,34 @@ end
   end
 
   @Record STMT_TERMINATE begin
-
     msg::Exp
     source #= the origin of the component/equation/algorithm =#::ElementSource
   end
 
   @Record STMT_REINIT begin
-
     var #= Variable =#::Exp
     value #= Value  =#::Exp
     source #= the origin of the component/equation/algorithm =#::ElementSource
   end
 
   @Record STMT_NORETCALL begin
-
     exp::Exp
     source #= the origin of the component/equation/algorithm =#::ElementSource
   end
 
   @Record STMT_RETURN begin
-
     source #= the origin of the component/equation/algorithm =#::ElementSource
   end
 
   @Record STMT_BREAK begin
-
     source #= the origin of the component/equation/algorithm =#::ElementSource
   end
 
   @Record STMT_CONTINUE begin
-
     source #= the origin of the component/equation/algorithm =#::ElementSource
   end
 
   @Record STMT_ARRAY_INIT begin
-
     name::String
     ty::Type
     source #= the origin of the component/equation/algorithm =#::ElementSource
@@ -686,7 +613,6 @@ end
   =#
 
   @Record STMT_FAILURE begin
-
     body::List{Statement}
     source #= the origin of the component/equation/algorithm =#::ElementSource
   end
@@ -696,18 +622,15 @@ end
 optional `else\\' branch. =#
 @Uniontype Else begin
   @Record NOELSE begin
-
   end
 
   @Record ELSEIF begin
-
     exp::Exp
     statementLst::List{Statement}
     else_::Else
   end
 
   @Record ELSE begin
-
     statementLst::List{Statement}
   end
 end
@@ -718,7 +641,6 @@ end
 #= - Variables =#
 @Uniontype Var begin
   @Record TYPES_VAR begin
-
     name #= name =#::String
     attributes #= attributes =#::Attributes
     ty #= type =#::Type
@@ -730,7 +652,6 @@ end
 #= - Attributes =#
 @Uniontype Attributes begin
   @Record ATTR begin
-
     connectorType #= flow, stream or unspecified =#::ConnectorType
     parallelism #= parallelism =#::SCode.Parallelism
     variability #= variability =#::SCode.Variability
@@ -748,22 +669,18 @@ const dummyAttrInput = ATTR(NON_CONNECTOR(), SCode.NON_PARALLEL(), SCode.VAR(), 
 #= where this binding came from: either default binding or start value =#
 @Uniontype BindingSource begin
   @Record BINDING_FROM_DEFAULT_VALUE begin
-
   end
 
   @Record BINDING_FROM_START_VALUE begin
-
   end
 end
 
 #=We do not care..=#
 @Uniontype Binding begin
   @Record UNBOUND begin
-
   end
 
   @Record EQBOUND begin
-
     exp::Exp
     evaluatedExp::Option{Values.Value}
     constant_::Const
@@ -771,7 +688,6 @@ end
   end
 
   @Record VALBOUND begin
-
     valBound::Values.Value
     source::BindingSource
   end
@@ -839,7 +755,6 @@ the dimension of the output and the inline type of the function =#
   end
 
   @Record T_FUNCTION begin
-
     funcArg #= funcArg =#::List{FuncArg}
     funcResultType #= Only single-result =#::Type
     functionAttributes::FunctionAttributes
@@ -847,29 +762,24 @@ the dimension of the output and the inline type of the function =#
   end
 
   @Record T_FUNCTION_REFERENCE_VAR begin
-
     functionType #= the type of the function =#::Type
   end
 
   @Record T_FUNCTION_REFERENCE_FUNC begin
-
     builtin::Bool
     functionType #= type of the non-boxptr function =#::Type
   end
 
   @Record T_TUPLE begin
-
     types #= For functions returning multiple values. =#::List{Type}
     names #= For tuples elements that have names (function outputs) =#::Option{List{String}}
   end
 
   @Record T_CODE begin
-
     ty::CodeType
   end
 
   @Record T_ANYTYPE begin
-
     anyClassType #= anyClassType - used for generic types. When class state present the type is assumed to be a complex type which has that restriction. =#::Option{ClassInf.SMNode}
   end
 
@@ -877,17 +787,14 @@ the dimension of the output and the inline type of the function =#
   =#
 
   @Record T_METALIST begin
-
     ty #= listType =#::Type
   end
 
   @Record T_METATUPLE begin
-
     types::List{Type}
   end
 
   @Record T_METAOPTION begin
-
     ty::Type
   end
 
@@ -903,7 +810,6 @@ the dimension of the output and the inline type of the function =#
   end
 
   @Record T_METARECORD begin
-
     path #= the path to the record =#::Absyn.Path
     utPath #= the path to its uniontype; this is what we match the type against =#::Absyn.Path
     #=  If the metarecord constructor was added to the FunctionTree, this would
@@ -919,22 +825,18 @@ the dimension of the output and the inline type of the function =#
   end
 
   @Record T_METAARRAY begin
-
     ty::Type
   end
 
   @Record T_METABOXED begin
-
     ty::Type
   end
 
   @Record T_METAPOLYMORPHIC begin
-
     name::String
   end
 
   @Record T_METATYPE begin
-
     ty::Type
   end
 end
@@ -975,7 +877,6 @@ end
 
 @Uniontype FunctionAttributes begin
   @Record FUNCTION_ATTRIBUTES begin
-
     inline::InlineType
     isOpenModelicaPure #= if the function has __OpenModelica_Impure =#::Bool
     isImpure #= if the function has prefix *impure* is true, else false =#::Bool
@@ -987,17 +888,14 @@ end
 
 @Uniontype FunctionBuiltin begin
   @Record FUNCTION_NOT_BUILTIN begin
-
   end
 
   @Record FUNCTION_BUILTIN begin
-
     name::Option{String}
     unboxArgs::Bool
   end
 
   @Record FUNCTION_BUILTIN_PTR begin
-
   end
 end
 
@@ -1008,15 +906,12 @@ end
 
 @Uniontype FunctionParallelism begin
   @Record FP_NON_PARALLEL begin
-
   end
 
   @Record FP_PARALLEL_FUNCTION begin
-
   end
 
   @Record FP_KERNEL_FUNCTION begin
-
   end
 end
 
@@ -1064,11 +959,9 @@ end
 
 @Uniontype DimensionBinding begin
   @Record DIM_UNBOUND begin
-
   end
 
   @Record DIM_BOUND begin
-
     binding #= the dimension is bound to this expression =#::Exp
     constrains #= the bound has these constrains (collected when doing subtyping) =#::Dimensions
   end
@@ -1076,7 +969,6 @@ end
 
 @Uniontype FuncArg begin
   @Record FUNCARG begin
-
     name::String
     ty::Type
     constType::Const
@@ -1093,19 +985,15 @@ all other variables are not constant and will get C_VAR constantness.
 - Variable properties =#
 @Uniontype Const begin
   @Record C_CONST begin
-
   end
 
   @Record C_PARAM begin
-
   end
 
   @Record C_VAR begin
-
   end
 
   @Record C_UNKNOWN begin
-
   end
 end
 
@@ -1114,12 +1002,10 @@ Used by split_props
 - Tuple constants =#
 @Uniontype TupleConst begin
   @Record SINGLE_CONST begin
-
     constType::Const
   end
 
   @Record TUPLE_CONST begin
-
     tupleConstLst::List{TupleConst}
   end
 end
@@ -1133,14 +1019,12 @@ expressions.
 - Expression properties =#
 @Uniontype Properties begin
   @Record PROP begin
-
     type_ #= type =#::Type
     constFlag #= constFlag; if the type is a tuple, each element
     have a const flag. =#::Const
   end
 
   @Record PROP_TUPLE begin
-
     type_::Type
     tupleConst #= tupleConst; The elements might be
     tuple themselfs. =#::TupleConst
@@ -1160,7 +1044,6 @@ type, and whether a variable is of one of these types.
 - Modification datatype, was originally in Mod =#
 @Uniontype EqMod begin
   @Record TYPED begin
-
     modifierAsExp #= modifier as expression =#::Exp
     modifierAsValue #= modifier as Value option =#::Option{Values.Value}
     properties #= properties =#::Properties
@@ -1169,7 +1052,6 @@ type, and whether a variable is of one of these types.
   end
 
   @Record UNTYPED begin
-
     exp::Absyn.Exp
   end
 end
@@ -1177,7 +1059,6 @@ end
 #= -Sub Modification =#
 @Uniontype SubMod begin
   @Record NAMEMOD begin
-
     ident #= component name =#::String
     mod #= modification =#::Mod
   end
@@ -1186,7 +1067,6 @@ end
 #= Modification =#
 @Uniontype Mod begin
   @Record MOD begin
-
     finalPrefix #= final prefix =#::SCode.Final
     eachPrefix #= each prefix =#::SCode.Each
     subModLst::List{SubMod}
@@ -1195,7 +1075,6 @@ end
   end
 
   @Record REDECL begin
-
     finalPrefix #= final prefix =#::SCode.Final
     eachPrefix #= each prefix =#::SCode.Each
     element::SCode.Element
@@ -1203,34 +1082,28 @@ end
   end
 
   @Record NOMOD begin
-
   end
 end
 
 @Uniontype ClockKind begin
   @Record INFERRED_CLOCK begin
-
   end
 
   @Record INTEGER_CLOCK begin
-
     intervalCounter::Exp
     resolution #=  integer type >= 1  =#::Exp
   end
 
   @Record REAL_CLOCK begin
-
     interval::Exp
   end
 
   @Record BOOLEAN_CLOCK begin
-
     condition::Exp
     startInterval #=  real type >= 0.0  =#::Exp
   end
 
   @Record SOLVER_CLOCK begin
-
     c::Exp
     solverMethod #=  string type  =#::Exp
   end
@@ -1260,22 +1133,18 @@ When making additions, update at least the following functions:
   end
 
   @Record SCONST begin
-
     string #= String constants =#::String
   end
 
   @Record BCONST begin
-
     bool #= Bool constants =#::Bool
   end
 
   @Record CLKCONST begin
-
     clk #= Clock kinds =#::ClockKind
   end
 
   @Record ENUM_LITERAL begin
-
     name::Absyn.Path
     index::ModelicaInteger
   end
@@ -1292,26 +1161,22 @@ When making additions, update at least the following functions:
   end
 
   @Record UNARY begin
-
     operator::Operator
     exp::Exp
   end
 
   @Record LBINARY begin
-
     exp1::Exp
     operator::Operator
     exp2::Exp
   end
 
   @Record LUNARY begin
-
     operator::Operator
     exp::Exp
   end
 
   @Record RELATION begin
-
     exp1::Exp
     operator::Operator
     exp2::Exp
@@ -1339,7 +1204,6 @@ When making additions, update at least the following functions:
   end
 
   @Record PARTEVALFUNCTION begin
-
     path::Absyn.Path
     expList::List{Exp}
     ty::Type
@@ -1347,21 +1211,18 @@ When making additions, update at least the following functions:
   end
 
   @Record ARRAY begin
-
     ty::Type
     scalar #= scalar for codegen =#::Bool
     array #= Array constructor, e.g. {1,3,4} =#::List{Exp}
   end
 
   @Record MATRIX begin
-
     ty::Type
     integer #= Size of the first dimension =#::ModelicaInteger
     matrix::List{List{Exp}}
   end
 
   @Record RANGE begin
-
     ty #= the (array) type of the expression =#::Type
     start #= start value =#::Exp
     step #= step value =#::Option{Exp}
@@ -1369,32 +1230,27 @@ When making additions, update at least the following functions:
   end
 
   @Record TUPLE begin
-
     PR #= PR. Tuples, used in func calls returning several
     arguments =#::List{Exp}
   end
 
   @Record CAST begin
-
     ty #= This is the full type of this expression, i.e. ET_ARRAY(...) for arrays and matrices =#::Type
     exp::Exp
   end
 
   @Record ASUB begin
-
     exp::Exp
     sub::List{Exp}
   end
 
   @Record TSUB begin
-
     exp::Exp
     ix::ModelicaInteger
     ty::Type
   end
 
   @Record RSUB begin
-
     exp::Exp
     ix::ModelicaInteger
     #=  Used when generating code for MetaModelica records
@@ -1404,19 +1260,16 @@ When making additions, update at least the following functions:
   end
 
   @Record SIZE begin
-
     exp::Exp
     sz::Option{Exp}
   end
 
   @Record CODE begin
-
     code::Absyn.CodeNode
     ty::Type
   end
 
   @Record EMPTY begin
-
     scope #= the scope where we could not find the binding =#::String
     name #= the name of the variable =#::ComponentRef
     ty #= the type of the variable =#::Type
@@ -1424,7 +1277,6 @@ When making additions, update at least the following functions:
   end
 
   @Record REDUCTION begin
-
     reductionInfo::ReductionInfo
     expr #= expr, e.g i*i+1 =#::Exp
     iterators::ReductionIterators
@@ -1433,23 +1285,19 @@ When making additions, update at least the following functions:
   #= /* Part of MetaModelica extension. KS */ =#
 
   @Record LIST begin
-
     valList::List{Exp}
   end
 
   @Record CONS begin
-
     car::Exp
     cdr::Exp
   end
 
   @Record META_TUPLE begin
-
     listExp::List{Exp}
   end
 
   @Record META_OPTION begin
-
     exp::Option{Exp}
   end
 
@@ -1472,7 +1320,6 @@ When making additions, update at least the following functions:
   end
 
   @Record MATCHEXPRESSION begin
-
     matchType::MatchType
     inputs::List{Exp}
     aliases #= input aliases (input as-bindings) =#::List{List{String}}
@@ -1482,24 +1329,20 @@ When making additions, update at least the following functions:
   end
 
   @Record BOX begin
-
     exp::Exp
   end
 
   @Record UNBOX begin
-
     exp::Exp
     ty::Type
   end
 
   @Record SHARED_LITERAL begin
-
     index #= A unique indexing that can be used to point to a single shared literal in generated code =#::ModelicaInteger
     exp #= For printing strings, code generators that do not support this kind of literal, or for getting the type in case the code generator needs that =#::Exp
   end
 
   @Record PATTERN begin
-
     pattern::Pattern
   end
 
@@ -1508,11 +1351,9 @@ end
 
 @Uniontype TailCall begin
   @Record NO_TAIL begin
-
   end
 
   @Record TAIL begin
-
     vars::List{String}
     outVars::List{String}
   end
@@ -1520,7 +1361,6 @@ end
 
 @Uniontype CallAttributes begin
   @Record CALL_ATTR begin
-
     ty #= The type of the return value, if several return values this is undefined =#::Type
     tuple_ #= tuple =#::Bool
     builtin #= builtin Function call =#::Bool
@@ -1533,7 +1373,6 @@ end
 
 @Uniontype ReductionInfo begin
   @Record REDUCTIONINFO begin
-
     path #= array, sum,.. =#::Absyn.Path
     iterType::Absyn.ReductionIterType
     exprType::Type
@@ -1546,7 +1385,6 @@ end
 
 @Uniontype ReductionIterator begin
   @Record REDUCTIONITER begin
-
     id::String
     exp::Exp
     guardExp::Option{Exp}
@@ -1557,7 +1395,6 @@ end
 
 @Uniontype MatchCase begin
   @Record CASE begin
-
     patterns #= ELSE is handled by not doing pattern-matching =#::List{Pattern}
     patternGuard #= Guard-expression =#::Option{Exp}
     localDecls::List{Element}
@@ -1571,15 +1408,12 @@ end
 
 @Uniontype MatchType begin
   @Record MATCHCONTINUE begin
-
   end
 
   @Record TRY_STACKOVERFLOW begin
-
   end
 
   @Record MATCH begin
-
     switch #= The index of the pattern to switch over, its type and the value to divide string hashes with =#::Option{Tuple{ModelicaInteger, Type, ModelicaInteger}}
   end
 end
@@ -1587,17 +1421,14 @@ end
 #= Patterns deconstruct expressions =#
 @Uniontype Pattern begin
   @Record PAT_WILD begin
-
   end
 
   @Record PAT_CONSTANT begin
-
     ty #= so we can unbox if needed =#::Option{Type}
     exp::Exp
   end
 
   @Record PAT_AS begin
-
     id::String
     ty #= so we can unbox if needed =#::Option{Type}
     attr #= so we know if the ident is parameter or assignable =#::Attributes
@@ -1605,29 +1436,24 @@ end
   end
 
   @Record PAT_AS_FUNC_PTR begin
-
     id::String
     pat::Pattern
   end
 
   @Record PAT_META_TUPLE begin
-
     patterns::List{Pattern}
   end
 
   @Record PAT_CALL_TUPLE begin
-
     patterns::List{Pattern}
   end
 
   @Record PAT_CONS begin
-
     head::Pattern
     tail::Pattern
   end
 
   @Record PAT_CALL begin
-
     name::Absyn.Path
     index::ModelicaInteger
     patterns::List{Pattern}
@@ -1639,13 +1465,11 @@ end
   end
 
   @Record PAT_CALL_NAMED begin
-
     name::Absyn.Path
     patterns::List{Tuple{Pattern, String, Type}}
   end
 
   @Record PAT_SOME begin
-
     pat::Pattern
   end
 end
@@ -1656,162 +1480,130 @@ and the real addition operator (`ADD(REAL)\\') are two distinct
 operators. =#
 @Uniontype Operator begin
   @Record ADD begin
-
     ty::Type
   end
 
   @Record SUB begin
-
     ty::Type
   end
 
   @Record MUL begin
-
     ty::Type
   end
 
   @Record DIV begin
-
     ty::Type
   end
 
   @Record POW begin
-
     ty::Type
   end
 
   @Record UMINUS begin
-
     ty::Type
   end
 
   @Record UMINUS_ARR begin
-
     ty::Type
   end
 
   @Record ADD_ARR begin
-
     ty::Type
   end
 
   @Record SUB_ARR begin
-
     ty::Type
   end
 
   @Record MUL_ARR begin
-
     ty::Type
   end
 
   @Record DIV_ARR begin
-
     ty::Type
   end
 
   @Record MUL_ARRAY_SCALAR begin
-
     ty #= type of the array =#::Type
   end
 
   @Record ADD_ARRAY_SCALAR begin
-
     ty #= type of the array =#::Type
   end
 
   @Record SUB_SCALAR_ARRAY begin
-
     ty #= type of the array =#::Type
   end
 
   @Record MUL_SCALAR_PRODUCT begin
-
     ty #= type of the array =#::Type
   end
 
   @Record MUL_MATRIX_PRODUCT begin
-
     ty #= {{..},..}  {{..},{..}} =#::Type
   end
 
   @Record DIV_ARRAY_SCALAR begin
-
     ty #= type of the array =#::Type
   end
 
   @Record DIV_SCALAR_ARRAY begin
-
     ty #= type of the array =#::Type
   end
 
   @Record POW_ARRAY_SCALAR begin
-
     ty #= type of the array =#::Type
   end
 
   @Record POW_SCALAR_ARRAY begin
-
     ty #= type of the array =#::Type
   end
 
   @Record POW_ARR begin
-
     ty #= type of the array =#::Type
   end
 
   @Record POW_ARR2 begin
-
     ty #= type of the array =#::Type
   end
 
   @Record AND begin
-
     ty::Type
   end
 
   @Record OR begin
-
     ty::Type
   end
 
   @Record NOT begin
-
     ty::Type
   end
 
   @Record LESS begin
-
     ty::Type
   end
 
   @Record LESSEQ begin
-
     ty::Type
   end
 
   @Record GREATER begin
-
     ty::Type
   end
 
   @Record GREATEREQ begin
-
     ty::Type
   end
 
   @Record EQUAL begin
-
     ty::Type
   end
 
   @Record NEQUAL begin
-
     ty::Type
   end
 
   @Record USERDEFINED begin
-
     fqName #= The FQ name of the overloaded operator function =#::Absyn.Path
   end
 end
@@ -1834,7 +1626,6 @@ CREF_IDENT(..) is used for non-qualifed component names, e.g. x =#
   end
 
   @Record CREF_ITER begin
-
     ident::String
     index::ModelicaInteger
     identType #= type of the identifier, without considering the subscripts =#::Type
@@ -1862,41 +1653,33 @@ generating equations for flow variables, where outside connectors are
 multiplied with -1 (since flow is always into a component). =#
 @Uniontype Face begin
   @Record INSIDE begin
-
   end
 
   @Record OUTSIDE begin
-
   end
 
   @Record NO_FACE begin
-
   end
 end
 
 #= The type of a connector element. =#
 @Uniontype CConnectorType begin
   @Record CEQU begin
-
   end
 
   @Record CFLOW begin
-
   end
 
   @Record CSTREAM begin
-
     associatedFlow::Option{ComponentRef}
   end
 
   @Record CNO_TYPE begin
-
   end
 end
 
 @Uniontype ConnectorElement begin
   @Record CONNECTOR_ELEMENT begin
-
     name::ComponentRef
     face::Face
     ty::CConnectorType
@@ -1907,7 +1690,6 @@ end
 
 @Uniontype SetTrieNode begin
   @Record SET_TRIE_NODE begin
-
     name::String
     cref::ComponentRef
     nodes::List{SetTrieNode}
@@ -1915,7 +1697,6 @@ end
   end
 
   @Record SET_TRIE_LEAF begin
-
     name::String
     insideElement #= The inside element. =#::Option{ConnectorElement}
     outsideElement #= The outside element. =#::Option{ConnectorElement}
@@ -1944,7 +1725,6 @@ end
 
 @Uniontype Sets begin
   @Record SETS begin
-
     sets::SetTrie
     setCount #= How many sets the trie contains. =#::ModelicaInteger
     connections::List{SetConnection}
@@ -1955,13 +1735,11 @@ end
 #= A set of connection elements. =#
 @Uniontype CSet begin
   @Record SET begin
-
     ty::CConnectorType
     elements::List{ConnectorElement}
   end
 
   @Record SET_POINTER begin
-
     index::ModelicaInteger
   end
 end
@@ -1986,14 +1764,12 @@ const emptySet = SETS(SET_TRIE_NODE("", WILD(), nil, 0), 0, nil, nil)::Sets
   end
 
   @Record DEFINE begin
-
     componentRef::ComponentRef
     exp::Exp
     source #= the origin of the component/equation/algorithm =#::ElementSource
   end
 
   @Record INITIALDEFINE begin
-
     componentRef::ComponentRef
     exp::Exp
     source #= the origin of the component/equation/algorithm =#::ElementSource
@@ -2006,14 +1782,12 @@ const emptySet = SETS(SET_TRIE_NODE("", WILD(), nil, 0), 0, nil, nil)::Sets
   end
 
   @Record EQUEQUATION begin
-
     cr1::ComponentRef
     cr2::ComponentRef
     source #= the origin of the component/equation/algorithm =#::ElementSource
   end
 
   @Record ARRAY_EQUATION begin
-
     dimension #= dimension sizes =#::Dimensions
     exp::Exp
     array::Exp
@@ -2021,7 +1795,6 @@ const emptySet = SETS(SET_TRIE_NODE("", WILD(), nil, 0), 0, nil, nil)::Sets
   end
 
   @Record INITIAL_ARRAY_EQUATION begin
-
     dimension #= dimension sizes =#::Dimensions
     exp::Exp
     array::Exp
@@ -2029,7 +1802,6 @@ const emptySet = SETS(SET_TRIE_NODE("", WILD(), nil, 0), 0, nil, nil)::Sets
   end
 
   @Record CONNECT_EQUATION begin
-
     lhsElement::Element
     lhsFace::Face
     rhsElement::Element
@@ -2038,29 +1810,40 @@ const emptySet = SETS(SET_TRIE_NODE("", WILD(), nil, 0), 0, nil, nil)::Sets
   end
 
   @Record COMPLEX_EQUATION begin
-
     lhs::Exp
     rhs::Exp
     source #= the origin of the component/equation/algorithm =#::ElementSource
   end
 
   @Record INITIAL_COMPLEX_EQUATION begin
-
     lhs::Exp
     rhs::Exp
     source #= the origin of the component/equation/algorithm =#::ElementSource
   end
 
   @Record WHEN_EQUATION begin
-
     condition #= Condition =#::Exp
     equations #= Equations =#::List{Element}
     elsewhen_ #= Elsewhen should be of type WHEN_EQUATION =#::Option{Element}
     source #= the origin of the component/equation/algorithm =#::ElementSource
   end
 
-  @Record FOR_EQUATION begin
+  #= VSS extension: agentic reconfiguration equation.
+     Represents a reconfigure block in the DAE. At runtime the when-clause
+     condition fires, the agent is queried with the prompt and current state,
+     and the model is recompiled with the new parameter values.
+     whenClause is the mandatory head of the Cons list — structurally
+     guaranteeing that at least one when clause is always present. =#
+  @Record RECONFIGURE_EQUATION begin
+    variables        #= Parameters exposed to the agent =#::List{Absyn.ElementItem}
+    whenCondition    #= Primary trigger condition (DAE.Exp) =#::Exp
+    whenConstraint   #= Optional post-condition invariant (Option{DAE.Exp}) =#::Option
+    prompt           #= Natural-language prompt for the agent (Option{DAE.Exp}) =#::Option
+    initialEquations #= Constraint equations checked at recompilation time =#::Option
+    source           #= the origin of the element =#::ElementSource
+  end
 
+  @Record FOR_EQUATION begin
     type_ #= this is the type of the iterator =#::Type
     iterIsArray #= True if the iterator has an array type, otherwise false. =#::Bool
     iter #= the iterator variable =#::String
@@ -2085,20 +1868,17 @@ const emptySet = SETS(SET_TRIE_NODE("", WILD(), nil, 0), 0, nil, nil)::Sets
   end
 
   @Record INITIALEQUATION begin
-
     exp1::Exp
     exp2::Exp
     source #= the origin of the component/equation/algorithm =#::ElementSource
   end
 
   @Record ALGORITHM begin
-
     algorithm_::Algorithm
     source #= the origin of the component/equation/algorithm =#::ElementSource
   end
 
   @Record INITIALALGORITHM begin
-
     algorithm_::Algorithm
     source #= the origin of the component/equation/algorithm =#::ElementSource
   end
@@ -2113,13 +1893,11 @@ const emptySet = SETS(SET_TRIE_NODE("", WILD(), nil, 0), 0, nil, nil)::Sets
   end
 
   @Record EXTOBJECTCLASS begin
-
     path #= className of external object =#::Absyn.Path
     source #= the origin of the component/equation/algorithm =#::ElementSource
   end
 
   @Record ASSERT begin
-
     condition::Exp
     message::Exp
     level::Exp
@@ -2127,72 +1905,61 @@ const emptySet = SETS(SET_TRIE_NODE("", WILD(), nil, 0), 0, nil, nil)::Sets
   end
 
   @Record INITIAL_ASSERT begin
-
     condition::Exp
     message::Exp
     level::Exp
     source #= the origin of the component/equation/algorithm =#::ElementSource
   end
 
-@Record TERMINATE begin
+  @Record TERMINATE begin
+    message::Exp
+    source #= the origin of the component/equation/algorithm =#::ElementSource
+  end
 
-  message::Exp
-  source #= the origin of the component/equation/algorithm =#::ElementSource
-end
+  @Record INITIAL_TERMINATE begin
+    message::Exp
+    source #= the origin of the component/equation/algorithm =#::ElementSource
+  end
 
-@Record INITIAL_TERMINATE begin
+  @Record REINIT begin
+    componentRef::ComponentRef
+    exp::Exp
+    source #= the origin of the component/equation/algorithm =#::ElementSource
+  end
 
-  message::Exp
-  source #= the origin of the component/equation/algorithm =#::ElementSource
-end
+  @Record NORETCALL begin
+    exp::Exp
+    source #= the origin of the component/equation/algorithm =#::ElementSource
+  end
 
-@Record REINIT begin
+  @Record INITIAL_NORETCALL begin
+    exp::Exp
+    source #= the origin of the component/equation/algorithm =#::ElementSource
+  end
 
-  componentRef::ComponentRef
-  exp::Exp
-  source #= the origin of the component/equation/algorithm =#::ElementSource
-end
+  @Record CONSTRAINT begin
+    constraints::Constraint
+    source #= the origin of the component/equation/algorithm =#::ElementSource
+  end
 
-@Record NORETCALL begin
+  @Record CLASS_ATTRIBUTES begin
+    classAttrs::ClassAttributes
+  end
 
-  exp::Exp
-  source #= the origin of the component/equation/algorithm =#::ElementSource
-end
+  @Record FLAT_SM begin
+    ident::String
+    dAElist #= The states/modes transitions and variable
+    merging equations within the the flat state machine =#::List{Element}
+  end
 
-@Record INITIAL_NORETCALL begin
+  @Record SM_COMP begin
+    componentRef::ComponentRef
+    dAElist #= a component with subelements =#::List{Element}
+  end
 
-  exp::Exp
-  source #= the origin of the component/equation/algorithm =#::ElementSource
-end
-
-@Record CONSTRAINT begin
-
-  constraints::Constraint
-  source #= the origin of the component/equation/algorithm =#::ElementSource
-end
-
-@Record CLASS_ATTRIBUTES begin
-
-  classAttrs::ClassAttributes
-end
-
-@Record FLAT_SM begin
-
-  ident::String
-  dAElist #= The states/modes transitions and variable
-  merging equations within the the flat state machine =#::List{Element}
-end
-
-@Record SM_COMP begin
-
-  componentRef::ComponentRef
-  dAElist #= a component with subelements =#::List{Element}
-end
-
-@Record COMMENT begin
-
-  cmt #= Functions store the inherited class annotations in the DAE =#::SCode.Comment
-end
+  @Record COMMENT begin
+    cmt #= Functions store the inherited class annotations in the DAE =#::SCode.Comment
+  end
 end
 
 #= The `Subscript\\' and `ComponentRef\\' datatypes are simple
@@ -2219,11 +1986,9 @@ end
 #= array cref expansion strategy =#
 @Uniontype Expand begin
   @Record EXPAND begin
-
   end
 
   @Record NOT_EXPAND begin
-
   end
 end
 
@@ -2294,6 +2059,47 @@ FunctionTree = Dict{Absyn.Path, Function}
 
 function makeDummyCrefIdentOfTypeReal(name::String)
   CREF_IDENT(name, T_REAL_DEFAULT, nil)
+end
+
+"""
+Function to simplify the creation of DAE attributes.
+"""
+function makeRealAttribute(;quantity #= quantity =#::Option{Exp} = NONE(),
+                           unit #= unit =#::Option{Exp} = NONE(),
+                           displayUnit #= displayUnit =#::Option{Exp} = NONE(),
+                           min::Option{Exp} = NONE(),
+                           max::Option{Exp} = NONE(),
+                           start::Option{Float64} = NONE(),
+                           fixed::Bool,
+                           nominal #= nominal =#::Option{Exp} = NONE(),
+                           stateSelectOption::Option{StateSelect} = NONE(),
+                           uncertainOption::Option{Uncertainty} = NONE(),
+                           distributionOption::Option{Distribution} = NONE(),
+                           equationBound::Option{Exp} = NONE(),
+                           isProtected::Bool = false,
+                           finalPrefix::Bool = false,
+                           startOrigin::Option{Exp} = NONE())
+  startExp = @match start begin
+    SOME(v) => SOME{DAE.Exp}(DAE.RCONST(v))
+    _ => NONE()
+  end
+  VAR_ATTR_REAL(
+    quantity,
+    unit,
+    displayUnit,
+    min,
+    max,
+    startExp,
+    SOME{DAE.Exp}(DAE.BCONST(fixed)),
+    nominal,
+    stateSelectOption,
+    uncertainOption,
+    distributionOption,
+    equationBound,
+    SOME{DAE.Exp}(DAE.BCONST(isProtected)),
+    SOME{DAE.Exp}(DAE.BCONST(finalPrefix)),
+    startOrigin,
+  )
 end
 
 

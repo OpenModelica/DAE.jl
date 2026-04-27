@@ -1,7 +1,7 @@
 name = "DAE"
 uuid = "0174eeea-c361-11e9-3d0d-a9ca8048aff6"
 authors = ["John Tinnerholm johti <johti17@liu.se>"]
-version = "1.0.1"
+version = "1.0.2"
 
 [deps]
 Absyn = "ce2f92e2-a952-11e9-0543-8b443f216f1d"
@@ -9,3 +9,10 @@ ExportAll = "ad2082ca-a69e-11e9-38fa-e96309a31fe4"
 ImmutableList = "4a558cac-c1ed-11e9-20da-3584bcd8709a"
 MetaModelica = "9d7f2a79-07b5-5542-8b19-c0100dda6b06"
 SCode = "350d45b0-c210-11e9-3b9e-fdad65bb3d46"
+
+# Sibling OM.jl packages live in-tree. Resolve against the working copies.
+[sources]
+Absyn = { path = "../Absyn.jl" }
+ImmutableList = { path = "../ImmutableList.jl" }
+MetaModelica = { path = "../MetaModelica.jl" }
+SCode = { path = "../SCode.jl" }
