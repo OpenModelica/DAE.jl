@@ -296,6 +296,11 @@ end
     defaultDerivative #= if conditions fails, use default derivative if exists =#::Option{Absyn.Path}
     lowerOrderDerivatives::List{Absyn.Path}
   end
+
+  @Record FUNCTION_PARTIAL_DERIVATIVE begin
+    derivedFunction::Absyn.Path
+    derivedVars::List{String}
+  end
 end
 
 #= Different conditions on derivatives =#
