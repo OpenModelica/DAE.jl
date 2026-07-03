@@ -1,7 +1,7 @@
 #= /*
 * This file is part of OpenModelica.
 *
-* Copyright (c) 1998-CurrentYear, Open Source Modelica Consortium (OSMC),
+* Copyright (c) 1998-2026, Open Source Modelica Consortium (OSMC),
 * c/o Linköpings universitet, Department of Computer and Information Science,
 * SE-58183 Linköping, Sweden.
 *
@@ -49,17 +49,18 @@ import SCode
 
 const UNIQUEIO = "uniqueouter"::String
 
-const derivativeNamePrefix = "DER"::String
+#= pinned-OMC prefixes; the C templates match the $-forms literally =#
+const derivativeNamePrefix = "\$DER"::String
 
-const partialDerivativeNamePrefix = "pDER"::String
+const partialDerivativeNamePrefix = "\$pDER"::String
 
-const preNamePrefix = "PRE"::String
+const preNamePrefix = "\$PRE"::String
 
-const previousNamePrefix = "CLKPRE"::String
+const previousNamePrefix = "\$CLKPRE"::String
 
-const startNamePrefix = "START"::String
+const startNamePrefix = "\$START"::String
 
-const auxNamePrefix = "AUX"::String
+const auxNamePrefix = "\$AUX"::String
 
 @Uniontype VarKind begin
   @Record VARIABLE begin
@@ -455,7 +456,7 @@ end
 " A DAE_LIST is a list of Elements. Variables, equations, functions,
 algorithms, etc. are all found in this list.
 "
-struct DAE_LIST
+struct DAE_LIST <: DAElist
   elementLst::List{Element}
 end
 
@@ -645,9 +646,14 @@ end
     attributes #= attributes =#::Attributes
     ty #= type =#::Type
     binding #= equation modification =#::Binding
+    bind_from_outside #= binding came from out of scope (derived record classes) =#::Bool
     constOfForIteratorRange #= the constant-ness of the range if this is a for iterator, NONE() if is NOT a for iterator =#::Option{Const}
   end
 end
+
+# Compat: pre-bind_from_outside callers construct TYPES_VAR with 5 positional args.
+TYPES_VAR(name, attributes, ty, binding, constOfForIteratorRange::Option) =
+  TYPES_VAR(name, attributes, ty, binding, false, constOfForIteratorRange)
 
 #= - Attributes =#
 @Uniontype Attributes begin
@@ -745,6 +751,7 @@ the dimension of the output and the inline type of the function =#
     complexClassType #= The type of a class =#::ClassInf.SMNode
     varLst #= The variables of a complex type =#::List{Var}
     equalityConstraint::EqualityConstraint
+    usedExternally #= passed to an external function at some point =#::Bool
   end
 
   @Record T_SUBTYPE_BASIC begin
@@ -878,13 +885,42 @@ end
 @Uniontype FunctionAttributes begin
   @Record FUNCTION_ATTRIBUTES begin
     inline::InlineType
-    isOpenModelicaPure #= if the function has __OpenModelica_Impure =#::Bool
-    isImpure #= if the function has prefix *impure* is true, else false =#::Bool
+    generateEvents #= true if the function generates events =#::Bool
+    purity #= Purity enumeration (PURE/IMPURE) =#::Int
     isFunctionPointer #= if the function is a local variable =#::Bool
     isBuiltin::FunctionBuiltin
     functionParallelism::FunctionParallelism
+    noReturn #= NoReturn enumeration (RETURNS/NORETURN) =#::Int
   end
 end
+
+# Purity / NoReturn enumerations (pinned OMC), lowered to Ints (0-based).
+const PURE = 0
+const IMPURE = 1
+const UNDEFINED = 2
+const OM_IMPURE = 3
+const Purity = Int
+const RETURNS = 0
+const NORETURN = 1
+const NoReturn = Int
+
+# Compat: pre-purity-enum callers construct with
+# (inline, isOpenModelicaPure::Bool, isImpure::Bool, isFunctionPointer, isBuiltin, parallelism).
+FUNCTION_ATTRIBUTES(inline, isOpenModelicaPure::Bool, isImpure::Bool,
+                    isFunctionPointer::Bool, isBuiltin, functionParallelism) =
+  FUNCTION_ATTRIBUTES(inline, false,
+    isImpure ? IMPURE : (isOpenModelicaPure ? PURE : OM_IMPURE),
+    isFunctionPointer, isBuiltin, functionParallelism, RETURNS)
+
+# Compat: pre-noReturn callers with the purity enum (6 positional args).
+FUNCTION_ATTRIBUTES(inline, generateEvents::Bool, purity::Int,
+                    isFunctionPointer::Bool, isBuiltin, functionParallelism) =
+  FUNCTION_ATTRIBUTES(inline, generateEvents, purity,
+    isFunctionPointer, isBuiltin, functionParallelism, RETURNS)
+
+# Compat: pre-usedExternally callers (3 positional args).
+T_COMPLEX(complexClassType, varLst, equalityConstraint) =
+  T_COMPLEX(complexClassType, varLst, equalityConstraint, false)
 
 @Uniontype FunctionBuiltin begin
   @Record FUNCTION_NOT_BUILTIN begin
@@ -1108,6 +1144,10 @@ end
     solverMethod #=  string type  =#::Exp
   end
 end
+
+# Pinned-OMC ClockKind record names.
+const RATIONAL_CLOCK = INTEGER_CLOCK
+const EVENT_CLOCK = BOOLEAN_CLOCK
 
 #= /* -- End Types.mo -- */ =#
 
@@ -1368,8 +1408,14 @@ end
     isFunctionPointerCall::Bool
     inlineType::InlineType
     tailCall #= Input variables of the function if the call is tail-recursive =#::TailCall
+    noReturn #= NoReturn enumeration (RETURNS/NORETURN) =#::Int
   end
 end
+
+# Compat: pre-noReturn callers construct CALL_ATTR with 7 positional args.
+CALL_ATTR(ty, tuple_::Bool, builtin::Bool, isImpure::Bool, isFunctionPointerCall::Bool,
+          inlineType, tailCall) =
+  CALL_ATTR(ty, tuple_, builtin, isImpure, isFunctionPointerCall, inlineType, tailCall, RETURNS)
 
 @Uniontype ReductionInfo begin
   @Record REDUCTIONINFO begin
@@ -1746,6 +1792,10 @@ end
 
 const emptySet = SETS(SET_TRIE_NODE("", WILD(), nil, 0), 0, nil, nil)::Sets
 
+const Ident = String
+
+const StartValue = Option
+
 @Uniontype Element begin
   @Record VAR begin
     componentRef #=  The variable name =#::ComponentRef
@@ -1761,6 +1811,7 @@ const emptySet = SETS(SET_TRIE_NODE("", WILD(), nil, 0), 0, nil, nil)::Sets
     variableAttributesOption::Option{VariableAttributes}
     comment::Option{SCode.Comment}
     innerOuter #= inner/outer required to 'change' outer references =#::Absyn.InnerOuter
+    encrypted #= true if the variable belongs to an encrypted class =#::Bool
   end
 
   @Record DEFINE begin
@@ -1844,6 +1895,16 @@ const emptySet = SETS(SET_TRIE_NODE("", WILD(), nil, 0), 0, nil, nil)::Sets
   end
 
   @Record FOR_EQUATION begin
+    type_ #= this is the type of the iterator =#::Type
+    iterIsArray #= True if the iterator has an array type, otherwise false. =#::Bool
+    iter #= the iterator variable =#::String
+    index #= the index of the iterator variable, to make it unique; used by the new inst =#::ModelicaInteger
+    range #= range for the loop =#::Exp
+    equations #= Equations =#::List{Element}
+    source #= the origin of the component/equation/algorithm =#::ElementSource
+  end
+
+  @Record INITIAL_FOR_EQUATION begin
     type_ #= this is the type of the iterator =#::Type
     iterIsArray #= True if the iterator has an array type, otherwise false. =#::Bool
     iter #= the iterator variable =#::String
@@ -1992,6 +2053,41 @@ end
   end
 end
 
+#= Prefix for classes is its variability =#
+@Uniontype ClassPrefix begin
+  @Record CLASSPRE begin
+    variability #= VAR, DISCRETE, PARAM, or CONST =#::SCode.Variability
+  end
+end
+
+#= Prefix for component name, e.g. a.b[2].c. Stored in inverse order c.b[2].a =#
+@Uniontype ComponentPrefix begin
+  @Record PRE begin
+    prefix #= prefix name =#::String
+    dimensions::List{Dimension}
+    subscripts::List{Subscript}
+    next #= next prefix =#::ComponentPrefix
+    ci_state::ClassInf.State
+    info::SourceInfo
+  end
+
+  @Record NOCOMPPRE begin
+  end
+end
+
+#= A Prefix has a component prefix and a class prefix. =#
+@Uniontype Prefix begin
+  @Record NOPRE begin
+  end
+
+  @Record PREFIX begin
+    compPre #= component prefixes are stored in inverse order c.b.a =#::ComponentPrefix
+    classPre #= the class prefix, i.e. variability =#::ClassPrefix
+  end
+end
+
+const InstDims = List
+
 const emptyDae = DAE_LIST(nil)::DAE_LIST
 const T_ASSERTIONLEVEL = T_ENUMERATION(NONE(), Absyn.FULLYQUALIFIED(Absyn.IDENT("AssertionLevel")), list("error", "warning"), nil, nil)::Type
 
@@ -2102,6 +2198,42 @@ function makeRealAttribute(;quantity #= quantity =#::Option{Exp} = NONE(),
   )
 end
 
+
+# Compat: pre-encrypted-field callers construct VAR with 13 positional args.
+VAR(componentRef, kind, direction, parallelism, protection, ty, binding, dims,
+    connectorType, source, variableAttributesOption, comment, innerOuter) =
+  VAR(componentRef, kind, direction, parallelism, protection, ty, binding, dims,
+      connectorType, source, variableAttributesOption, comment, innerOuter, false)
+
+# DAE.Connect compatibility: this port flattens Connect's members into DAE with
+# C-prefixed renames for collision-prone names; qualified `DAE.Connect.X` still works.
+module Connect
+const _P = Base.parentmodule(@__MODULE__)
+const Face = _P.Face
+const INSIDE = _P.INSIDE
+const OUTSIDE = _P.OUTSIDE
+const NO_FACE = _P.NO_FACE
+const ConnectorType = _P.CConnectorType
+const EQU = _P.CEQU
+const FLOW = _P.CFLOW
+const STREAM = _P.CSTREAM
+const NO_TYPE = _P.CNO_TYPE
+const ConnectorElement = _P.ConnectorElement
+const CONNECTOR_ELEMENT = _P.CONNECTOR_ELEMENT
+const SetTrieNode = _P.SetTrieNode
+const SET_TRIE_NODE = _P.SET_TRIE_NODE
+const SET_TRIE_LEAF = _P.SET_TRIE_LEAF
+const SetTrie = _P.SetTrie
+const SetConnection = _P.SetConnection
+const OuterConnect = _P.OuterConnect
+const OUTERCONNECT = _P.OUTERCONNECT
+const Sets = _P.Sets
+const SETS = _P.SETS
+const Set = _P.CSet
+const SET = _P.SET
+const SET_POINTER = _P.SET_POINTER
+const emptySet = _P.emptySet
+end
 
 @exportAll()
 

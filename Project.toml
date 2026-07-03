@@ -1,7 +1,7 @@
 name = "DAE"
 uuid = "0174eeea-c361-11e9-3d0d-a9ca8048aff6"
 authors = ["John Tinnerholm johti <johti17@liu.se>"]
-version = "1.0.3"
+version = "1.1.0"
 
 [deps]
 Absyn = "ce2f92e2-a952-11e9-0543-8b443f216f1d"

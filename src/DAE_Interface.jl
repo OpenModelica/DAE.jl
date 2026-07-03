@@ -1,7 +1,7 @@
 #= /*
 * This file is part of OpenModelica.
 *
-* Copyright (c) 1998-CurrentYear, Open Source Modelica Consortium (OSMC),
+* Copyright (c) 1998-2026, Open Source Modelica Consortium (OSMC),
 * c/o Linköpings universitet, Department of Computer and Information Science,
 * SE-58183 Linköping, Sweden.
 *
@@ -37,6 +37,7 @@
  This file is needed to provide a necessary interface for Prefix.jl
 =#
 const Dimensions = List  #= a list of dimensions =#
+const InstDims = List  #= instance dimensions: list<Dimension> =#
 @UniontypeDecl VarKind
 @UniontypeDecl ConnectorType
 @UniontypeDecl VarDirection
