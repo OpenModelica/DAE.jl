@@ -411,6 +411,9 @@ end
 
   @Record REFINE begin
   end
+
+  @Record PROPAGATE begin
+  end
 end
 
 @Uniontype Distribution begin
