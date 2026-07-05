@@ -1289,7 +1289,7 @@ When making additions, update at least the following functions:
 
   @Record ASUB begin
     exp::Exp
-    sub::List{Exp}
+    sub::List{Subscript}
   end
 
   @Record TSUB begin
