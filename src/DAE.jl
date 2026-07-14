@@ -390,6 +390,14 @@ const emptyVarAttrReal = VAR_ATTR_REAL(NONE(), NONE(), NONE(), NONE(), NONE(), N
 
 const emptyVarAttrBool = VAR_ATTR_BOOL(NONE(), NONE(), NONE(), NONE(), NONE(), NONE(), NONE())::VariableAttributes
 
+const emptyVarAttrInt = VAR_ATTR_INT(NONE(), NONE(), NONE(), NONE(), NONE(), NONE(), NONE(), NONE(), NONE(), NONE(), NONE())::VariableAttributes
+
+const emptyVarAttrClock = VAR_ATTR_CLOCK(NONE(), NONE())::VariableAttributes
+
+const emptyVarAttrString = VAR_ATTR_STRING(NONE(), NONE(), NONE(), NONE(), NONE(), NONE(), NONE())::VariableAttributes
+
+const emptyVarAttrEnum = VAR_ATTR_ENUMERATION(NONE(), NONE(), NONE(), NONE(), NONE(), NONE(), NONE(), NONE(), NONE())::VariableAttributes
+
 @Uniontype StateSelect begin
   @Record NEVER begin
   end
