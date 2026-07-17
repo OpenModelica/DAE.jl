@@ -695,6 +695,12 @@ const dummyAttrInput = ATTR(NON_CONNECTOR(), SCode.NON_PARALLEL(), SCode.VAR(), 
 
   @Record BINDING_FROM_START_VALUE begin
   end
+
+  @Record BINDING_FROM_RECORD_SUBMODS begin
+  end
+
+  @Record BINDING_FROM_DERIVED_RECORD_DECL begin
+  end
 end
 
 #=We do not care..=#
