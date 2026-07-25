@@ -297,6 +297,11 @@ end
     lowerOrderDerivatives::List{Absyn.Path}
   end
 
+  @Record FUNCTION_INVERSE begin
+    inputParam #= The input parameter the inverse is for =#::ComponentRef
+    inverseCall #= The inverse function call =#::Exp
+  end
+
   @Record FUNCTION_PARTIAL_DERIVATIVE begin
     derivedFunction::Absyn.Path
     derivedVars::List{String}
